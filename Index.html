@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BM Tag Printing Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#1a1a1a; --muted:#6b6b6b; --bg:#f4f4f2; --panel:#fff; --accent:#c8102e; --accent2:#d21f3c; --soft:#e7e7e4; --green:#0a6b3b; --ui:'Poppins','Segoe UI',Arial,sans-serif; }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--ui);background:var(--bg);color:var(--ink);}
+  header{background:var(--panel);border-bottom:2px solid var(--ink);padding:16px 26px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;}
+  header h1{font-size:17px;margin:0;letter-spacing:.5px;font-weight:700;}
+  header .sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 20px 80px;}
+  .controls{background:var(--panel);border:1px solid var(--soft);border-radius:10px;padding:20px 22px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+  .btn{border:1.5px solid var(--ink);background:var(--ink);color:#fff;padding:10px 18px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;}
+  .btn:hover{background:#000;}
+  .btn.secondary{background:#fff;color:var(--ink);}
+  .btn.secondary:hover{background:var(--soft);}
+  .btn.pdf{background:var(--green);border-color:var(--green);}
+  .btn.pdf:hover{background:#0c7d45;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .filezone{border:2px dashed #bbb;border-radius:9px;padding:22px;text-align:center;color:var(--muted);cursor:pointer;background:#fafafa;}
+  .filezone:hover,.filezone.drag{border-color:var(--accent);background:#fff5f6;color:var(--ink);}
+  .filezone strong{color:var(--ink);}
+  .meta{font-size:12.5px;color:var(--muted);margin-top:6px;}
+  .divider{height:1px;background:var(--soft);margin:16px 0;}
+  .count-pill{background:var(--soft);border-radius:20px;padding:5px 14px;font-size:13px;font-weight:600;}
+  .hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5;}
+  #err{display:none;background:#fdecec;border:1px solid #f2b8b8;color:#8a1f1f;padding:10px 14px;border-radius:7px;font-size:13px;margin-top:12px;white-space:pre-wrap;}
+  #sheet{background:transparent;}
+  .page{background:#fff;width:210mm;min-height:297mm;margin:0 auto 20px;padding:10mm;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;flex-wrap:wrap;align-content:flex-start;gap:0;}
+  .tag{width:95.0mm;border:1px solid #000;margin:0 -1px -1px 0;break-inside:avoid;}
+  table.tt{border-collapse:collapse;width:100%;table-layout:fixed;font-family:Arial,sans-serif;}
+  table.tt col.c1{width:22.14mm;} table.tt col.c2{width:30.16mm;} table.tt col.c3{width:11.11mm;} table.tt col.c4{width:14.29mm;} table.tt col.c5{width:17.27mm;}
+  table.tt td{border:1px solid #000;font-size:9.5px;padding:2px 4px;vertical-align:middle;line-height:1.1;height:19px;overflow:hidden;}
+  table.tt td.lbl{font-weight:600;white-space:nowrap;}
+  table.tt td.val{font-weight:400;word-break:break-word;}
+  table.tt td.val[contenteditable]{cursor:text;outline:none;}
+  table.tt td.val[contenteditable]:hover{background:#fff7e6;}
+  table.tt td.val[contenteditable]:focus{background:#fff3cd;box-shadow:inset 0 0 0 2px #e0a800;}
+  .tag{position:relative;}
+  .tag .del{position:absolute;top:-9px;right:-9px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:12px;line-height:1;cursor:pointer;display:none;z-index:5;padding:0;}
+  .tag:hover .del{display:block;}
+  .empty-state{text-align:center;color:var(--muted);padding:60px 20px;font-size:15px;}
+  @media print{ header,.controls,.noprint{display:none !important;} body{background:#fff;} .wrap{max-width:none;margin:0;padding:0;} .page{box-shadow:none;margin:0;width:198mm;min-height:auto;page-break-after:always;padding:4mm;} .page:last-child{page-break-after:auto;} .tag .del{display:none !important;} table.tt td.val[contenteditable]:hover,table.tt td.val[contenteditable]:focus{background:transparent !important;box-shadow:none !important;} }
+  @page{size:A4;margin:6mm;}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>BM SAMPLE TAG &mdash; PRINT TOOL</h1>
+    <div class="sub">Load data &rarr; preview tags &rarr; save as PDF or print</div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="controls noprint">
+    <div id="drop" class="filezone">
+      <strong>Click to upload a CSV file</strong> or drag it here<br>
+      <span class="meta">In Excel: File &rarr; Save As &rarr; choose <strong>CSV (Comma delimited)</strong>, then upload that file here.</span>
+      <input id="file" type="file" accept=".csv,text/csv" style="display:none">
+    </div>
+
+    <div class="divider"></div>
+    <div class="row">
+      <span id="count" class="count-pill">No data loaded</span>
+      <button id="btnAdd" class="btn secondary" disabled>+ Add blank tag</button>
+      <div style="flex:1"></div>
+      <button id="btnPDF" class="btn pdf" disabled>&#128424;&nbsp; Save as PDF</button>
+      <button id="btnPrint" class="btn secondary" disabled>&#128424;&nbsp; Print</button>
+    </div>
+    <div class="hint">
+      <strong>Tip:</strong> click any value in a tag below to edit it directly &mdash; your changes are kept for the PDF/print. Hover a tag and click the red &times; to remove it.<br>
+      Tags match your Word tag size exactly and pack tight (shared cut-lines) for easy scissor-cutting.<br>
+      <strong>Save as PDF</strong> opens the print view &mdash; in the dialog, set <em>Destination</em> to &ldquo;Save as PDF&rdquo;, turn <em>off</em> Headers and footers, and set Margins to None. <strong>Print</strong> is the same but for sending straight to a printer.
+    </div>
+    <div id="err"></div>
+  </div>
+  <div id="sheet"><div class="empty-state">Load data to see your tag blocks here.</div></div>
+</div>
+
+<script>
+"use strict";
+function showErr(m){var e=document.getElementById("err");e.style.display="block";e.textContent=m;}
+function clearErr(){var e=document.getElementById("err");e.style.display="none";e.textContent="";}
+
+var FIELDS=["STYLE# & NAME:","COLOR","SAMPLE STAGE:","FACTORY:","SAMPLE ORIGIN:","DATE:","SEASON:","SIZE:","POD:"];
+var KEYMAP={
+ "style# & name":"STYLE# & NAME:","style# & name:":"STYLE# & NAME:","style#":"STYLE# & NAME:","style":"STYLE# & NAME:",
+ "color":"COLOR","colour":"COLOR",
+ "sample stage":"SAMPLE STAGE:","sample stage:":"SAMPLE STAGE:","stage":"SAMPLE STAGE:",
+ "factory":"FACTORY:","factory:":"FACTORY:",
+ "sample origin":"SAMPLE ORIGIN:","sample origin:":"SAMPLE ORIGIN:","origin":"SAMPLE ORIGIN:",
+ "date":"DATE:","date:":"DATE:",
+ "season":"SEASON:","season:":"SEASON:",
+ "size":"SIZE:","size:":"SIZE:",
+ "pod":"POD:","pod:":"POD:"
+};
+var ROWS=[];
+
+// --- tiny CSV parser (handles quotes, commas, tabs, CRLF) ---
+function detectDelim(text){
+  var firstLine=text.split(/\r?\n/)[0]||"";
+  var tabs=(firstLine.match(/\t/g)||[]).length;
+  var commas=(firstLine.match(/,/g)||[]).length;
+  return tabs>commas ? "\t" : ",";
+}
+function parseDelimited(text, delim){
+  var rows=[], row=[], cur="", i=0, inQ=false;
+  while(i<text.length){
+    var ch=text[i];
+    if(inQ){
+      if(ch=='"'){ if(text[i+1]=='"'){cur+='"';i+=2;continue;} inQ=false;i++;continue; }
+      cur+=ch;i++;continue;
+    }
+    if(ch=='"'){inQ=true;i++;continue;}
+    if(ch==delim){row.push(cur);cur="";i++;continue;}
+    if(ch=='\r'){i++;continue;}
+    if(ch=='\n'){row.push(cur);rows.push(row);row=[];cur="";i++;continue;}
+    cur+=ch;i++;
+  }
+  if(cur!==""||row.length){row.push(cur);rows.push(row);}
+  return rows;
+}
+function fmtDate(s){
+  // convert 2026-06-02 or 2026/06/02 -> 06/02/2026 ; leave others as-is
+  var m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if(m){ return String(m[2]).padStart(2,"0")+"/"+String(m[3]).padStart(2,"0")+"/"+m[1]; }
+  return s;
+}
+function norm(s){ s=String(s==null?"":s).trim(); if(s.toLowerCase()==="nan")return ""; return s; }
+function rowsToObjects(matrix){
+  if(!matrix.length) return [];
+  var header=matrix[0].map(function(h){return String(h).trim();});
+  var mapIdx=header.map(function(h){return KEYMAP[h.toLowerCase()]||null;});
+  var out=[];
+  for(var r=1;r<matrix.length;r++){
+    var cells=matrix[r];
+    if(!cells.length||cells.every(function(c){return String(c).trim()==="";})) continue;
+    var o={}; FIELDS.forEach(function(f){o[f]="";});
+    for(var c=0;c<cells.length;c++){ var t=mapIdx[c]; if(t){ var val=norm(cells[c]); if(t==="DATE:") val=fmtDate(val); o[t]=val; } }
+    if(FIELDS.some(function(f){return o[f]!=="";})) out.push(o);
+  }
+  return out;
+}
+function loadText(text){
+  try{
+    var delim=detectDelim(text);
+    var matrix=parseDelimited(text, delim);
+    ROWS=rowsToObjects(matrix);
+    if(!ROWS.length){ showErr("No valid rows found. Make sure the first row has the column headers (STYLE# & NAME, COLOR, etc.)."); render(); return; }
+    clearErr(); render();
+  }catch(err){ showErr("Could not read data: "+err.message); }
+}
+
+function handleFile(file){
+  var rd=new FileReader();
+  rd.onerror=function(){ showErr("File could not be read."); };
+  rd.onload=function(e){ loadText(e.target.result); };
+  rd.readAsText(file);
+}
+
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+function vcell(idx, field, span){
+  var sp = span?(' colspan="'+span+'"'):'';
+  return '<td class="val" contenteditable="true" data-i="'+idx+'" data-f="'+esc(field)+'"'+sp+'>'+esc(ROWS[idx][field]||"")+'</td>';
+}
+function tagHTML(idx){
+  return '<div class="tag" data-i="'+idx+'"><button class="del" data-del="'+idx+'" title="Remove this tag">&times;</button><table class="tt">'
+   +'<colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"></colgroup>'
+   +'<tr><td class="lbl">STYLE# &amp; NAME:</td>'+vcell(idx,"STYLE# & NAME:",4)+'</tr>'
+   +'<tr><td class="lbl">COLOR</td>'+vcell(idx,"COLOR",2)+'<td class="lbl">DATE:</td>'+vcell(idx,"DATE:")+'</tr>'
+   +'<tr><td class="lbl">SAMPLE STAGE:</td>'+vcell(idx,"SAMPLE STAGE:",2)+'<td class="lbl">SEASON:</td>'+vcell(idx,"SEASON:")+'</tr>'
+   +'<tr><td class="lbl">FACTORY:</td>'+vcell(idx,"FACTORY:",2)+'<td class="lbl">SIZE:</td>'+vcell(idx,"SIZE:")+'</tr>'
+   +'<tr><td class="lbl">SAMPLE ORIGIN:</td>'+vcell(idx,"SAMPLE ORIGIN:")+'<td class="lbl">POD:</td>'+vcell(idx,"POD:",2)+'</tr>'
+   +'</table></div>';
+}
+function render(){
+  var sheet=document.getElementById("sheet"), cnt=document.getElementById("count");
+  var has=ROWS.length>0;
+  document.getElementById("btnPDF").disabled=!has;
+  document.getElementById("btnPrint").disabled=!has;
+  document.getElementById("btnAdd").disabled=false;
+  if(!has){ sheet.innerHTML='<div class="empty-state">Load data to see your tag blocks here. You can also use &ldquo;+ Add blank tag&rdquo; to build tags by hand.</div>'; cnt.textContent="No data loaded"; return; }
+  cnt.textContent=ROWS.length+" tag"+(ROWS.length>1?"s":"")+" loaded";
+  var html='<div class="page">';
+  for(var i=0;i<ROWS.length;i++) html+=tagHTML(i);
+  html+='</div>';
+  sheet.innerHTML=html;
+}
+function blankRow(){ var o={}; FIELDS.forEach(function(f){o[f]="";}); return o; }
+
+// WIRING
+(function(){
+  var drop=document.getElementById("drop"), fileInput=document.getElementById("file");
+  drop.onclick=function(){ fileInput.click(); };
+  fileInput.onchange=function(e){ if(e.target.files[0]) handleFile(e.target.files[0]); };
+  ["dragover","dragenter"].forEach(function(ev){ drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add("drag");}); });
+  ["dragleave","drop"].forEach(function(ev){ drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove("drag");}); });
+  drop.addEventListener("drop",function(e){ if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+  document.getElementById("btnPDF").onclick=function(){ try{ window.print(); }catch(err){ showErr("Could not open print view: "+err.message); } };
+  document.getElementById("btnPrint").onclick=function(){ try{ window.print(); }catch(err){ showErr("Could not open print view: "+err.message); } };
+
+  // Add a blank tag and scroll to it
+  document.getElementById("btnAdd").onclick=function(){
+    ROWS.push(blankRow());
+    render();
+    var tags=document.querySelectorAll(".tag");
+    if(tags.length){ tags[tags.length-1].scrollIntoView({behavior:"smooth",block:"center"}); }
+  };
+
+  var sheet=document.getElementById("sheet");
+  // Inline edit: write changes back into ROWS (no full re-render, so focus stays put)
+  sheet.addEventListener("input", function(e){
+    var td=e.target;
+    if(td && td.classList && td.classList.contains("val") && td.hasAttribute("data-i")){
+      var i=parseInt(td.getAttribute("data-i"),10);
+      var f=td.getAttribute("data-f");
+      if(!isNaN(i) && ROWS[i]){ ROWS[i][f]=td.textContent; }
+    }
+  });
+  // Enter key = commit and blur instead of adding a newline
+  sheet.addEventListener("keydown", function(e){
+    if(e.key==="Enter" && e.target.classList && e.target.classList.contains("val")){
+      e.preventDefault(); e.target.blur();
+    }
+  });
+  // Delete a tag
+  sheet.addEventListener("click", function(e){
+    var b=e.target;
+    if(b && b.hasAttribute && b.hasAttribute("data-del")){
+      var i=parseInt(b.getAttribute("data-del"),10);
+      if(!isNaN(i)){ ROWS.splice(i,1); render(); }
+    }
+  });
+})();
+</script>
+</body>
+</html>
