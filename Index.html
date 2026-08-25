@@ -8,7 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{ --ink:#1a1a1a; --muted:#6b6b6b; --bg:#f4f4f2; --panel:#fff; --accent:#c8102e; --accent2:#d21f3c; --soft:#e7e7e4; --green:#0a6b3b; --ui:'Poppins','Segoe UI',Arial,sans-serif; }
+  :root{ --ink:#1a1a1a; --muted:#6b6b6b; --bg:#f4f4f2; --panel:#fff; --accent:#c8102e; --accent2:#d21f3c; --soft:#e7e7e4; --green:#0a6b3b; --ui:'Poppins','Segoe UI',Arial,sans-serif;
+         --tagFont:9.5px; --tagRowH:19px; --tagBorder:0.5pt; --tagGapX:0mm; --tagGapY:0mm; }
   *{box-sizing:border-box;}
   body{margin:0;font-family:var(--ui);background:var(--bg);color:var(--ink);}
   header{background:var(--panel);border-bottom:2px solid var(--ink);padding:16px 26px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;}
@@ -31,14 +32,23 @@
   .divider{height:1px;background:var(--soft);margin:16px 0;}
   .count-pill{background:var(--soft);border-radius:20px;padding:5px 14px;font-size:13px;font-weight:600;}
   .hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5;}
+  .sizepanel{background:var(--panel);border:1px solid var(--soft);border-radius:10px;padding:16px 20px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .sizepanel h3{margin:0 0 4px;font-size:14px;font-weight:600;}
+  .sizepanel .sub2{font-size:12px;color:var(--muted);margin-bottom:14px;}
+  .sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 22px;}
+  .sctl label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px;}
+  .sctl .valout{font-weight:400;color:var(--accent);margin-left:6px;}
+  .sctl input[type=range]{width:100%;accent-color:var(--accent);}
+  .sizepanel .actions{margin-top:14px;display:flex;gap:10px;align-items:center;}
+  .link-reset{background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;}
   #err{display:none;background:#fdecec;border:1px solid #f2b8b8;color:#8a1f1f;padding:10px 14px;border-radius:7px;font-size:13px;margin-top:12px;white-space:pre-wrap;}
   #sheet{background:transparent;}
-  .page{background:#fff;width:210mm;min-height:297mm;margin:0 auto 20px;padding:10mm;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;flex-wrap:wrap;align-content:flex-start;gap:0;}
-  .tag{width:95.0mm;border:1px solid #000;margin:0 -1px -1px 0;break-inside:avoid;}
+  .page{background:#fff;width:210mm;min-height:297mm;margin:0 auto 20px;padding:10mm;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;flex-wrap:wrap;align-content:flex-start;gap:var(--tagGapY) var(--tagGapX);}
+  .tag{width:95.0mm;margin:0 -0.18mm -0.18mm 0;break-inside:avoid;}
   table.tt{border-collapse:collapse;width:100%;table-layout:fixed;font-family:Arial,sans-serif;}
   table.tt col.c1{width:22.14mm;} table.tt col.c2{width:30.16mm;} table.tt col.c3{width:11.11mm;} table.tt col.c4{width:14.29mm;} table.tt col.c5{width:17.27mm;}
-  table.tt td{border:1px solid #000;font-size:9.5px;padding:2px 4px;vertical-align:middle;line-height:1.1;height:19px;overflow:hidden;}
-  table.tt td.lbl{font-weight:600;white-space:nowrap;}
+  table.tt td{border:var(--tagBorder) solid #000;font-size:var(--tagFont);padding:2px 4px;vertical-align:middle;line-height:1.1;height:var(--tagRowH);overflow:hidden;}
+  table.tt td.lbl{font-weight:400;white-space:nowrap;}
   table.tt td.val{font-weight:400;word-break:break-word;}
   table.tt td.val[contenteditable]{cursor:text;outline:none;}
   table.tt td.val[contenteditable]:hover{background:#fff7e6;}
@@ -81,6 +91,37 @@
     </div>
     <div id="err"></div>
   </div>
+
+  <div class="sizepanel noprint" id="sizepanel">
+    <h3>Size adjustments</h3>
+    <div class="sub2">Fine-tune the tag appearance. Changes apply live and carry through to the PDF/print. Defaults match your Word template.</div>
+    <div class="sgrid">
+      <div class="sctl">
+        <label>Text size <span class="valout" id="outFont">9.5 px</span></label>
+        <input type="range" id="rngFont" min="7" max="13" step="0.5" value="9.5">
+      </div>
+      <div class="sctl">
+        <label>Row height <span class="valout" id="outRowH">19 px</span></label>
+        <input type="range" id="rngRowH" min="14" max="30" step="1" value="19">
+      </div>
+      <div class="sctl">
+        <label>Border thickness <span class="valout" id="outBorder">0.5 pt</span></label>
+        <input type="range" id="rngBorder" min="0.25" max="2" step="0.25" value="0.5">
+      </div>
+      <div class="sctl">
+        <label>Gap between columns <span class="valout" id="outGapX">0 mm</span></label>
+        <input type="range" id="rngGapX" min="0" max="8" step="0.5" value="0">
+      </div>
+      <div class="sctl">
+        <label>Gap between rows <span class="valout" id="outGapY">0 mm</span></label>
+        <input type="range" id="rngGapY" min="0" max="8" step="0.5" value="0">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="link-reset" id="btnResetSize">Reset to template defaults</button>
+    </div>
+  </div>
+
   <div id="sheet"><div class="empty-state">Load data to see your tag blocks here.</div></div>
 </div>
 
@@ -192,6 +233,7 @@ function render(){
   for(var i=0;i<ROWS.length;i++) html+=tagHTML(i);
   html+='</div>';
   sheet.innerHTML=html;
+  if(typeof window.__applySizesAfterRender==="function") window.__applySizesAfterRender();
 }
 function blankRow(){ var o={}; FIELDS.forEach(function(f){o[f]="";}); return o; }
 
@@ -214,7 +256,47 @@ function blankRow(){ var o={}; FIELDS.forEach(function(f){o[f]="";}); return o; 
     if(tags.length){ tags[tags.length-1].scrollIntoView({behavior:"smooth",block:"center"}); }
   };
 
-  var sheet=document.getElementById("sheet");
+  // ---- Size adjustments panel ----
+  var root=document.documentElement;
+  var DEFAULTS={font:9.5,rowH:19,border:0.5,gapX:0,gapY:0};
+  function applySizes(s){
+    root.style.setProperty("--tagFont", s.font+"px");
+    root.style.setProperty("--tagRowH", s.rowH+"px");
+    root.style.setProperty("--tagBorder", s.border+"pt");
+    root.style.setProperty("--tagGapX", s.gapX+"mm");
+    root.style.setProperty("--tagGapY", s.gapY+"mm");
+    document.getElementById("outFont").textContent=s.font+" px";
+    document.getElementById("outRowH").textContent=s.rowH+" px";
+    document.getElementById("outBorder").textContent=s.border+" pt";
+    document.getElementById("outGapX").textContent=s.gapX+" mm";
+    document.getElementById("outGapY").textContent=s.gapY+" mm";
+    // when any gap is added, drop the -0.18mm overlap so lines don't overlap oddly
+    var overlap=(s.gapX==0 && s.gapY==0);
+    var tags=document.querySelectorAll(".tag");
+    for(var i=0;i<tags.length;i++){ tags[i].style.margin = overlap ? "0 -0.18mm -0.18mm 0" : "0"; }
+  }
+  function readSizes(){
+    return {
+      font:parseFloat(document.getElementById("rngFont").value),
+      rowH:parseFloat(document.getElementById("rngRowH").value),
+      border:parseFloat(document.getElementById("rngBorder").value),
+      gapX:parseFloat(document.getElementById("rngGapX").value),
+      gapY:parseFloat(document.getElementById("rngGapY").value)
+    };
+  }
+  ["rngFont","rngRowH","rngBorder","rngGapX","rngGapY"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", function(){ applySizes(readSizes()); });
+  });
+  document.getElementById("btnResetSize").onclick=function(){
+    document.getElementById("rngFont").value=DEFAULTS.font;
+    document.getElementById("rngRowH").value=DEFAULTS.rowH;
+    document.getElementById("rngBorder").value=DEFAULTS.border;
+    document.getElementById("rngGapX").value=DEFAULTS.gapX;
+    document.getElementById("rngGapY").value=DEFAULTS.gapY;
+    applySizes(DEFAULTS);
+  };
+  applySizes(DEFAULTS);
+  window.__applySizesAfterRender=function(){ applySizes(readSizes()); };
   // Inline edit: write changes back into ROWS (no full re-render, so focus stays put)
   sheet.addEventListener("input", function(e){
     var td=e.target;
