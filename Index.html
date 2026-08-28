@@ -49,6 +49,11 @@
   .sizepanel .actions{margin-top:14px;display:flex;gap:10px;align-items:center;}
   .link-reset{background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;}
   .maparea{width:100%;min-height:170px;border:1px solid #bbb;border-radius:7px;padding:9px 11px;font-family:Consolas,'Courier New',monospace;font-size:12.5px;line-height:1.5;resize:vertical;}
+  .seasonbar{margin-top:14px;padding:10px 14px;background:#f7f7f5;border:1px solid var(--soft);border-radius:8px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;}
+  .seasonbar .sb-label{font-weight:600;font-size:13px;}
+  .seasonbar label{display:inline-flex;align-items:center;gap:6px;font-size:13px;background:#fff;border:1px solid #d5d5d2;border-radius:20px;padding:5px 12px;cursor:pointer;}
+  .seasonbar label input{accent-color:var(--accent);cursor:pointer;}
+  .seasonbar .cnt{color:var(--muted);font-size:12px;}
   #err{display:none;background:#fdecec;border:1px solid #f2b8b8;color:#8a1f1f;padding:10px 14px;border-radius:7px;font-size:13px;margin-top:12px;white-space:pre-wrap;}
   #info{display:none;background:#e8f4ec;border:1px solid #b6dcc4;color:#0a5c33;padding:10px 14px;border-radius:7px;font-size:13px;margin-top:12px;white-space:pre-wrap;}
   #sheet{background:transparent;}
@@ -116,6 +121,13 @@
       <button id="btnApplyMap" class="btn secondary">Re-apply POD mapping</button>
       <div style="flex:1"></div>
       <button id="btnEditMaps" class="link-reset" style="text-decoration:underline;">Edit mapping lists</button>
+    </div>
+
+    <div id="seasonBar" class="seasonbar" style="display:none;">
+      <span class="sb-label">Seasons:</span>
+      <span id="seasonBoxes"></span>
+      <button id="btnSeasonAll" class="link-reset" style="margin-left:6px;">All</button>
+      <button id="btnSeasonNone" class="link-reset">None</button>
     </div>
 
     <div class="row" style="margin-top:14px;">
@@ -223,6 +235,7 @@ var KEYMAP={
  "pod":"POD:","pod:":"POD:"
 };
 var ROWS=[];
+var ACTIVE_SEASONS=null; // null = show all; otherwise a set of selected season strings
 
 // ---- POD mapping (Style code -> Concat key -> Sub Category = POD) ----
 var DEFAULT_PRODUCT=[
@@ -404,6 +417,7 @@ function rowsToObjects(matrix, mode){
 // Build ROWS from a matrix of cell values (shared by Excel + CSV paths)
 function loadMatrix(matrix, mode){
   ROWS=rowsToObjects(matrix, mode);
+  ACTIVE_SEASONS=null; // reset filter for the new dataset
   var info=window.__lastExtractInfo;
   if(info && info.noheader){
     showErr("This doesn't look like the customer BM Orders file (couldn't find the 'Status' and 'Style-Option' columns). If it's your own tag-format sheet, use the Internal file box instead.");
@@ -474,17 +488,67 @@ function tagHTML(idx){
    +'<tr><td class="lbl">SAMPLE ORIGIN:</td>'+vcell(idx,"SAMPLE ORIGIN:",0,"fit")+'<td class="lbl">POD:</td>'+vcell(idx,"POD:",2,"fit")+'</tr>'
    +'</table></div>';
 }
+// ---- Season filter ----
+function distinctSeasons(){
+  var seen={}, order=[];
+  for(var i=0;i<ROWS.length;i++){
+    var s=(ROWS[i]["SEASON:"]||"").trim();
+    var key=s===""?"(blank)":s;
+    if(!seen[key]){ seen[key]=0; order.push(key); }
+    seen[key]++;
+  }
+  return {order:order, counts:seen};
+}
+function seasonKeyOf(row){ var s=(row["SEASON:"]||"").trim(); return s===""?"(blank)":s; }
+function rowVisible(i){
+  if(!ACTIVE_SEASONS) return true;
+  return ACTIVE_SEASONS[seasonKeyOf(ROWS[i])]===true;
+}
+function buildSeasonBar(){
+  var bar=document.getElementById("seasonBar");
+  var box=document.getElementById("seasonBoxes");
+  var info=distinctSeasons();
+  // Only show the filter when there's more than one season
+  if(info.order.length<=1){ bar.style.display="none"; ACTIVE_SEASONS=null; return; }
+  // initialise ACTIVE_SEASONS (all on) if not set or seasons changed
+  if(!ACTIVE_SEASONS){ ACTIVE_SEASONS={}; info.order.forEach(function(s){ ACTIVE_SEASONS[s]=true; }); }
+  else { info.order.forEach(function(s){ if(!(s in ACTIVE_SEASONS)) ACTIVE_SEASONS[s]=true; }); }
+  var html="";
+  info.order.forEach(function(s){
+    var checked=ACTIVE_SEASONS[s]?"checked":"";
+    html+='<label><input type="checkbox" data-season="'+esc(s)+'" '+checked+'>'+esc(s)+' <span class="cnt">('+info.counts[s]+')</span></label>';
+  });
+  box.innerHTML=html;
+  bar.style.display="flex";
+}
+function visibleCount(){
+  var n=0; for(var i=0;i<ROWS.length;i++){ if(rowVisible(i)) n++; } return n;
+}
+
 function render(){
   var sheet=document.getElementById("sheet"), cnt=document.getElementById("count");
   var has=ROWS.length>0;
-  document.getElementById("btnPDF").disabled=!has;
-  document.getElementById("btnPrint").disabled=!has;
-  document.getElementById("btnDownloadData").disabled=!has;
   document.getElementById("btnAdd").disabled=false;
-  if(!has){ sheet.innerHTML='<div class="empty-state">Load data to see your tag blocks here. You can also use &ldquo;+ Add blank tag&rdquo; to build tags by hand.</div>'; cnt.textContent="No data loaded"; return; }
-  cnt.textContent=ROWS.length+" tag"+(ROWS.length>1?"s":"")+" loaded";
+  if(!has){
+    document.getElementById("btnPDF").disabled=true;
+    document.getElementById("btnPrint").disabled=true;
+    document.getElementById("btnDownloadData").disabled=true;
+    document.getElementById("seasonBar").style.display="none";
+    sheet.innerHTML='<div class="empty-state">Load data to see your tag blocks here. You can also use &ldquo;+ Add blank tag&rdquo; to build tags by hand.</div>';
+    cnt.textContent="No data loaded"; return;
+  }
+  buildSeasonBar();
+  var vis=visibleCount();
+  document.getElementById("btnPDF").disabled=(vis===0);
+  document.getElementById("btnPrint").disabled=(vis===0);
+  document.getElementById("btnDownloadData").disabled=false;
+  if(ACTIVE_SEASONS && vis!==ROWS.length){
+    cnt.textContent=vis+" of "+ROWS.length+" tag"+(ROWS.length>1?"s":"")+" shown";
+  } else {
+    cnt.textContent=ROWS.length+" tag"+(ROWS.length>1?"s":"")+" loaded";
+  }
   var html='<div class="page">';
-  for(var i=0;i<ROWS.length;i++) html+=tagHTML(i);
+  for(var i=0;i<ROWS.length;i++){ if(rowVisible(i)) html+=tagHTML(i); }
   html+='</div>';
   sheet.innerHTML=html;
   if(typeof window.__applySizesAfterRender==="function") window.__applySizesAfterRender();
@@ -540,6 +604,26 @@ function fitStyleNames(){ fitCells(); }
   };
 
   // ---- Download internal file: export current ROWS in the internal Data format ----
+  // ---- Season filter events ----
+  document.getElementById("seasonBoxes").addEventListener("change", function(e){
+    var cb=e.target;
+    if(cb && cb.hasAttribute && cb.hasAttribute("data-season")){
+      if(!ACTIVE_SEASONS) ACTIVE_SEASONS={};
+      ACTIVE_SEASONS[cb.getAttribute("data-season")]=cb.checked;
+      render();
+    }
+  });
+  document.getElementById("btnSeasonAll").onclick=function(){
+    var info=distinctSeasons(); ACTIVE_SEASONS={};
+    info.order.forEach(function(s){ ACTIVE_SEASONS[s]=true; });
+    render();
+  };
+  document.getElementById("btnSeasonNone").onclick=function(){
+    var info=distinctSeasons(); ACTIVE_SEASONS={};
+    info.order.forEach(function(s){ ACTIVE_SEASONS[s]=false; });
+    render();
+  };
+
   document.getElementById("btnDownloadData").onclick=function(){
     try{
       if(!ROWS.length){ showErr("Load or add tags first."); return; }
