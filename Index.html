@@ -16,8 +16,25 @@
   header{background:var(--panel);border-bottom:2px solid var(--ink);padding:16px 26px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;}
   header h1{font-size:17px;margin:0;letter-spacing:.5px;font-weight:700;}
   header .sub{font-size:12px;color:var(--muted);margin-top:2px;}
-  .wrap{max-width:1180px;margin:0 auto;padding:22px 20px 80px;}
-  .controls{background:var(--panel);border:1px solid var(--soft);border-radius:10px;padding:20px 22px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .wrap{max-width:none;margin:0;padding:18px 18px 80px;}
+  .layout{display:flex;gap:16px;align-items:flex-start;}
+  .leftcol{flex:0 0 500px;max-width:500px;min-width:0;}
+  .rightcol{flex:1;min-width:0;overflow-x:auto;}
+  @media (max-width:1050px){ .layout{flex-direction:column;} .leftcol{flex-basis:auto;max-width:none;width:100%;} }
+  .controls{background:var(--panel);border:1px solid var(--soft);border-radius:10px;padding:18px;margin-bottom:0;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .uploaders{display:flex;flex-direction:column;gap:10px;}
+  .filezone.half{flex:none;min-width:0;padding:16px;}
+  .tpl-line{margin-top:10px;font-size:12.5px;color:var(--muted);text-align:center;}
+  .linkbtn{background:none;border:none;color:var(--accent);font-size:inherit;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;}
+  .sec{margin-top:14px;}
+  .sec-title{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .field-row{display:flex;gap:8px;margin-bottom:8px;}
+  .field-row input{flex:1;min-width:0;padding:9px 11px;border:1px solid #bbb;border-radius:7px;font-size:13.5px;}
+  .btn.sm{padding:9px 12px;font-size:13px;white-space:nowrap;}
+  .btn-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .btn-grid2 .btn{width:100%;}
+  .statusline{margin-bottom:8px;}
+  .season-boxes{display:flex;flex-wrap:wrap;gap:8px;}
   .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
   .btn{border:1.5px solid var(--ink);background:var(--ink);color:#fff;padding:10px 18px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;}
   .btn:hover{background:#000;}
@@ -49,18 +66,16 @@
   .sizepanel .actions{margin-top:14px;display:flex;gap:10px;align-items:center;}
   .link-reset{background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;}
   .maparea{width:100%;min-height:170px;border:1px solid #bbb;border-radius:7px;padding:9px 11px;font-family:Consolas,'Courier New',monospace;font-size:12.5px;line-height:1.5;resize:vertical;}
-  .seasonbar{margin-top:14px;padding:10px 14px;background:#f7f7f5;border:1px solid var(--soft);border-radius:8px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;}
-  .seasonbar .sb-label{font-weight:600;font-size:13px;}
-  .seasonbar label{display:inline-flex;align-items:center;gap:6px;font-size:13px;background:#fff;border:1px solid #d5d5d2;border-radius:20px;padding:5px 12px;cursor:pointer;}
-  .seasonbar label input{accent-color:var(--accent);cursor:pointer;}
-  .seasonbar .cnt{color:var(--muted);font-size:12px;}
+  .season-boxes label{display:inline-flex;align-items:center;gap:6px;font-size:13px;background:#fff;border:1px solid #d5d5d2;border-radius:20px;padding:5px 12px;cursor:pointer;}
+  .season-boxes label input{accent-color:var(--accent);cursor:pointer;}
+  .season-boxes .cnt{color:var(--muted);font-size:12px;}
   #err{display:none;background:#fdecec;border:1px solid #f2b8b8;color:#8a1f1f;padding:10px 14px;border-radius:7px;font-size:13px;margin-top:12px;white-space:pre-wrap;}
   #info{display:none;background:#e8f4ec;border:1px solid #b6dcc4;color:#0a5c33;padding:10px 14px;border-radius:7px;font-size:13px;margin-top:12px;white-space:pre-wrap;}
   #sheet{background:transparent;}
-  .page{background:#fff;width:210mm;min-height:297mm;margin:0 auto 20px;padding:10mm;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;flex-wrap:wrap;align-content:flex-start;gap:var(--tagGapY) var(--tagGapX);}
-  .tag{width:95.0mm;margin:0 -0.18mm -0.18mm 0;break-inside:avoid;border:var(--tagOuter) solid #000;}
+  .page{background:#fff;width:210mm;min-height:297mm;margin:0 0 20px 0;padding:10mm;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;flex-wrap:wrap;align-content:flex-start;gap:var(--tagGapY) var(--tagGapX);}
+  .tag{width:99.0mm;margin:0 -0.18mm -0.18mm 0;break-inside:avoid;border:var(--tagOuter) solid #000;}
   table.tt{border-collapse:collapse;width:100%;table-layout:fixed;font-family:Arial,sans-serif;}
-  table.tt col.c1{width:22.14mm;} table.tt col.c2{width:30.16mm;} table.tt col.c3{width:11.11mm;} table.tt col.c4{width:14.29mm;} table.tt col.c5{width:17.27mm;}
+  table.tt col.c1{width:23.07mm;} table.tt col.c2{width:31.43mm;} table.tt col.c3{width:11.58mm;} table.tt col.c4{width:14.89mm;} table.tt col.c5{width:18.00mm;}
   table.tt td{border:var(--tagBorder) solid #000;font-size:var(--tagFont);padding:2px 4px;vertical-align:middle;line-height:1.1;height:var(--tagRowH);overflow:hidden;}
   table.tt td.lbl{font-weight:400;white-space:nowrap;}
   table.tt td.val{font-weight:400;word-break:break-word;}
@@ -81,7 +96,7 @@
     .tag .del{display:none !important;}
     table.tt td.val[contenteditable]:hover,table.tt td.val[contenteditable]:focus{background:transparent !important;box-shadow:none !important;}
   }
-  @page{size:A4;margin:8mm;}
+  @page{size:A4;margin:6mm;}
 </style>
 </head>
 <body>
@@ -92,56 +107,65 @@
   </div>
 </header>
 <div class="wrap">
+ <div class="layout">
+  <div class="leftcol noprint">
   <div class="controls noprint">
+    <!-- Upload section -->
     <div class="uploaders">
       <div id="dropCust" class="filezone half">
         <div class="fz-title">Customer file</div>
-        <strong>Click to upload</strong> or drag here<br>
-        <span class="meta">The customer&rsquo;s original BM Orders file. Cancelled lines are removed; DATE &amp; POD left blank to fill.</span>
+        <strong>Click to upload</strong><br>
+        <span class="meta">Original BM Orders file. Cancelled lines removed; DATE &amp; POD left blank.</span>
         <input id="fileCust" type="file" accept=".xlsx,.xls,.csv,text/csv" style="display:none">
       </div>
       <div id="dropInt" class="filezone half">
         <div class="fz-title">Internal file</div>
-        <strong>Click to upload</strong> or drag here<br>
-        <span class="meta">Your own &ldquo;Data&rdquo; sheet or CSV, already in tag format (STYLE# &amp; NAME, COLOR, &hellip;).</span>
+        <strong>Click to upload</strong><br>
+        <span class="meta">Your own Data sheet or CSV, already in tag format.</span>
         <input id="fileInt" type="file" accept=".xlsx,.xls,.csv,text/csv" style="display:none">
       </div>
     </div>
-    <div style="margin-top:10px;font-size:13px;">
-      Need a blank starting point? <button id="btnTemplate" class="link-reset" style="text-decoration:underline;">Download Excel template</button>
+    <div class="tpl-line">Need a blank starting point? <button id="btnTemplate" class="linkbtn">Download Excel template</button></div>
+
+    <div class="divider"></div>
+
+    <!-- Date + mapping section -->
+    <div class="sec">
+      <div class="sec-title">Date &amp; mapping</div>
+      <div class="field-row">
+        <input type="text" id="dateAll" placeholder="Date for all tags (MM/DD/YYYY)">
+        <button id="btnApplyDate" class="btn secondary sm">Apply</button>
+      </div>
+      <div class="btn-grid2">
+        <button id="btnApplyMap" class="btn secondary sm">Re-apply POD</button>
+        <button id="btnEditMaps" class="btn secondary sm">Edit mappings</button>
+      </div>
+    </div>
+
+    <!-- Season filter -->
+    <div id="seasonBar" class="sec" style="display:none;">
+      <div class="sec-title">Seasons <button id="btnSeasonAll" class="linkbtn">All</button> <button id="btnSeasonNone" class="linkbtn">None</button></div>
+      <div id="seasonBoxes" class="season-boxes"></div>
     </div>
 
     <div class="divider"></div>
-    <div class="row" style="align-items:flex-end;">
-      <div class="sctl" style="min-width:180px;">
-        <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:5px;">Date for all tags</label>
-        <input type="text" id="dateAll" placeholder="MM/DD/YYYY" style="padding:8px 10px;border:1px solid #bbb;border-radius:6px;font-size:14px;width:150px;">
+
+    <!-- Tag actions -->
+    <div class="sec">
+      <div class="statusline"><span id="count" class="count-pill">No data loaded</span></div>
+      <div class="btn-grid2">
+        <button id="btnAdd" class="btn secondary sm">+ Add tag</button>
+        <button id="btnDownloadData" class="btn secondary sm" disabled>&#8681; Internal file</button>
       </div>
-      <button id="btnApplyDate" class="btn secondary">Apply date to all</button>
-      <button id="btnApplyMap" class="btn secondary">Re-apply POD mapping</button>
-      <div style="flex:1"></div>
-      <button id="btnEditMaps" class="link-reset" style="text-decoration:underline;">Edit mapping lists</button>
+      <div class="btn-grid2" style="margin-top:8px;">
+        <button id="btnPDF" class="btn pdf" disabled>&#128424; Save as PDF</button>
+        <button id="btnPrint" class="btn secondary" disabled>&#128424; Print</button>
+      </div>
     </div>
 
-    <div id="seasonBar" class="seasonbar" style="display:none;">
-      <span class="sb-label">Seasons:</span>
-      <span id="seasonBoxes"></span>
-      <button id="btnSeasonAll" class="link-reset" style="margin-left:6px;">All</button>
-      <button id="btnSeasonNone" class="link-reset">None</button>
-    </div>
-
-    <div class="row" style="margin-top:14px;">
-      <span id="count" class="count-pill">No data loaded</span>
-      <button id="btnAdd" class="btn secondary">+ Add blank tag</button>
-      <button id="btnDownloadData" class="btn secondary" disabled>&#8681;&nbsp; Download internal file</button>
-      <div style="flex:1"></div>
-      <button id="btnPDF" class="btn pdf" disabled>&#128424;&nbsp; Save as PDF</button>
-      <button id="btnPrint" class="btn secondary" disabled>&#128424;&nbsp; Print</button>
-    </div>
     <div class="hint">
-      <strong>Tip:</strong> click any value in a tag below to edit it directly &mdash; your changes are kept for the PDF/print. Hover a tag and click the red &times; to remove it.<br>
-      <strong>Date for all tags:</strong> type one date and click &ldquo;Apply date to all&rdquo; to set it on every tag. <strong>POD</strong> is auto-filled from the Style code using your mapping lists when a customer file loads.<br>
-      <strong>Save as PDF</strong> opens the print view &mdash; set <em>Destination</em> to &ldquo;Save as PDF&rdquo;, turn <em>off</em> Headers and footers, Margins None.
+      <strong>Tip:</strong> click any value in a tag to edit it; hover a tag and click the red &times; to remove it.<br>
+      <strong>Save as PDF:</strong> in the dialog set Destination to &ldquo;Save as PDF&rdquo;, Headers/footers off, Margins None.
     </div>
     <div id="err"></div>
     <div id="info"></div>
@@ -201,7 +225,12 @@
     </div>
   </div>
 
-  <div id="sheet"><div class="empty-state">Load data to see your tag blocks here.</div></div>
+  </div>
+
+  <div class="rightcol">
+    <div id="sheet"><div class="empty-state">Load data to see your tag blocks here.</div></div>
+  </div>
+ </div>
 </div>
 
 <script>/*! xlsx.js (C) 2013-present SheetJS -- http://sheetjs.com */
@@ -519,7 +548,7 @@ function buildSeasonBar(){
     html+='<label><input type="checkbox" data-season="'+esc(s)+'" '+checked+'>'+esc(s)+' <span class="cnt">('+info.counts[s]+')</span></label>';
   });
   box.innerHTML=html;
-  bar.style.display="flex";
+  bar.style.display="block";
 }
 function visibleCount(){
   var n=0; for(var i=0;i<ROWS.length;i++){ if(rowVisible(i)) n++; } return n;
