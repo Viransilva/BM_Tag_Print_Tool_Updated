@@ -56,6 +56,22 @@
   .divider{height:1px;background:var(--soft);margin:16px 0;}
   .count-pill{background:var(--soft);border-radius:20px;padding:5px 14px;font-size:13px;font-weight:600;}
   .hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5;}
+  .guide-overlay{position:fixed;inset:0;background:rgba(20,20,20,.5);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;}
+  .guide-card{background:#fff;border-radius:14px;max-width:720px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.25);overflow:hidden;}
+  .guide-head{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--soft);position:sticky;top:0;background:#fff;}
+  .guide-head h2{margin:0;font-size:19px;font-weight:700;}
+  .guide-x{background:none;border:none;font-size:26px;line-height:1;cursor:pointer;color:var(--muted);padding:0 4px;}
+  .guide-x:hover{color:var(--ink);}
+  .guide-body{padding:12px 24px 4px;}
+  .guide-step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f0f0ee;}
+  .guide-step:last-child{border-bottom:none;}
+  .gn{flex:0 0 28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .guide-step strong{font-size:14.5px;}
+  .guide-step p{margin:6px 0;font-size:13.5px;line-height:1.55;color:#333;}
+  .guide-step ul{margin:6px 0;padding-left:18px;font-size:13.5px;line-height:1.55;color:#333;}
+  .guide-step li{margin:3px 0;}
+  .guide-note{background:#f7f7f5;border:1px solid var(--soft);border-radius:7px;padding:8px 11px;font-size:12.5px !important;}
+  .guide-foot{padding:16px 24px;border-top:1px solid var(--soft);text-align:right;position:sticky;bottom:0;background:#fff;}
   .sizepanel{background:var(--panel);border:1px solid var(--soft);border-radius:10px;padding:16px 20px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
   .sizepanel h3{margin:0 0 4px;font-size:14px;font-weight:600;}
   .sizepanel .sub2{font-size:12px;color:var(--muted);margin-bottom:14px;}
@@ -109,7 +125,61 @@
     <h1>BM SAMPLE TAG &mdash; PRINT TOOL</h1>
     <div class="sub">Load data &rarr; preview tags &rarr; save as PDF or print</div>
   </div>
+  <div style="flex:1"></div>
+  <button id="btnGuide" class="btn secondary noprint" style="white-space:nowrap;">? How to use</button>
 </header>
+
+<div id="guideOverlay" class="guide-overlay noprint" style="display:none;">
+  <div class="guide-card">
+    <div class="guide-head">
+      <h2>How to use this tool</h2>
+      <button id="btnGuideClose" class="guide-x" title="Close">&times;</button>
+    </div>
+    <div class="guide-body">
+      <div class="guide-step"><span class="gn">1</span><div>
+        <strong>Load your data</strong>
+        <p>Drag or click to upload into one of the two boxes:</p>
+        <ul>
+          <li><strong>Customer file</strong> &mdash; the original BM Orders tracker (.xlsx). The tool keeps only <em>Confirmed</em> rows (Cancelled lines are removed automatically), builds the tag fields, auto-fills <strong>POD</strong> from the style code, and leaves <strong>DATE</strong> blank for you.</li>
+          <li><strong>Internal file</strong> &mdash; your own Data sheet or CSV that is already in tag format (STYLE# &amp; NAME, COLOR, &hellip;). Nothing is filtered or remapped.</li>
+        </ul>
+        <p>No file yet? Click <strong>Download Excel template</strong> for a blank sheet with the right columns.</p>
+      </div></div>
+
+      <div class="guide-step"><span class="gn">2</span><div>
+        <strong>Pick the season(s)</strong>
+        <p>If the customer file has <em>more than one season</em>, a <strong>Seasons</strong> filter appears with a checkbox per season (and its tag count). Everything is checked at first.</p>
+        <ul>
+          <li>To print <strong>just one season</strong>, untick the others &mdash; only the ticked season shows on screen and prints. Your data stays loaded; re-tick any time.</li>
+          <li><strong>All</strong> / <strong>None</strong> toggle every box at once.</li>
+          <li>With only one season in the file, the filter stays hidden (nothing to choose).</li>
+        </ul>
+      </div></div>
+
+      <div class="guide-step"><span class="gn">3</span><div>
+        <strong>Set the date &amp; check POD</strong>
+        <p>Type one date in <strong>Date for all tags</strong> and click <strong>Apply</strong> &mdash; it fills every tag. POD is auto-filled from the style code; use <strong>Re-apply POD</strong> after edits, or <strong>Edit mappings</strong> to change the Product / Sub-Category lists.</p>
+      </div></div>
+
+      <div class="guide-step"><span class="gn">4</span><div>
+        <strong>Edit tags inline</strong>
+        <p>Click any value in a tag to edit it. Hover a tag and click the red <strong>&times;</strong> to remove it. <strong>+ Add tag</strong> makes a blank one. Long values shrink to stay on one line so every tag is the same height.</p>
+      </div></div>
+
+      <div class="guide-step"><span class="gn">5</span><div>
+        <strong>Download or print</strong>
+        <p><strong>Download internal file</strong> saves the current data (all seasons) as an Excel file you can edit and re-upload via the Internal box. <strong>Save as PDF</strong> / <strong>Print</strong> output only what's visible &mdash; so filter to one season first if that's all you need.</p>
+        <p class="guide-note">In the print dialog: paper <strong>A4</strong>, Destination &ldquo;Save as PDF&rdquo;, <strong>Headers and footers off</strong>, <strong>Margins None/Default</strong>. Tags print two-across at true tag size.</p>
+      </div></div>
+
+      <div class="guide-step"><span class="gn">6</span><div>
+        <strong>Fine-tune size (optional)</strong>
+        <p>The <strong>Size adjustments</strong> panel changes text size, row height, border thickness and gaps live. <strong>Reset to template defaults</strong> restores the original Word-template sizing.</p>
+      </div></div>
+    </div>
+    <div class="guide-foot"><button id="btnGuideGot" class="btn pdf">Got it</button></div>
+  </div>
+</div>
 <div class="wrap">
  <div class="layout">
   <div class="leftcol noprint">
@@ -653,6 +723,16 @@ window.addEventListener("resize", function(){
   document.getElementById("btnPDF").onclick=function(){ try{ window.print(); }catch(err){ showErr("Could not open print view: "+err.message); } };
   document.getElementById("btnPrint").onclick=function(){ try{ window.print(); }catch(err){ showErr("Could not open print view: "+err.message); } };
   // Download Excel template (embedded, works offline)
+  // ---- How to use guide ----
+  var guide=document.getElementById("guideOverlay");
+  function openGuide(){ guide.style.display="flex"; }
+  function closeGuide(){ guide.style.display="none"; }
+  document.getElementById("btnGuide").onclick=openGuide;
+  document.getElementById("btnGuideClose").onclick=closeGuide;
+  document.getElementById("btnGuideGot").onclick=closeGuide;
+  guide.addEventListener("click", function(e){ if(e.target===guide) closeGuide(); });
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape" && guide.style.display==="flex") closeGuide(); });
+
   document.getElementById("btnTemplate").onclick=function(){
     try{
       var bin=atob(TEMPLATE_B64);
