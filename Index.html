@@ -89,7 +89,7 @@
   #info{display:none;background:#e8f4ec;border:1px solid #b6dcc4;color:#0a5c33;padding:10px 14px;border-radius:7px;font-size:13px;margin-top:12px;white-space:pre-wrap;}
   #sheet{background:transparent;transform-origin:top left;}
   #sheet.scaled{margin-bottom:20px;}
-  .page{background:#fff;width:210mm;min-height:297mm;margin:0 0 20px 0;padding:10mm;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;flex-wrap:wrap;align-content:flex-start;gap:var(--tagGapY) var(--tagGapX);}
+  .page{background:#fff;width:210mm;min-height:297mm;margin:0 0 20px 0;padding:6mm;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;flex-wrap:wrap;align-content:flex-start;gap:var(--tagGapY) var(--tagGapX);}
   .tag{width:99.0mm;margin:0 -0.18mm -0.18mm 0;break-inside:avoid;border:var(--tagOuter) solid #000;}
   table.tt{border-collapse:collapse;width:100%;table-layout:fixed;font-family:Arial,sans-serif;}
   table.tt col.c1{width:23.07mm;} table.tt col.c2{width:31.43mm;} table.tt col.c3{width:11.58mm;} table.tt col.c4{width:14.89mm;} table.tt col.c5{width:18.00mm;}
@@ -140,7 +140,7 @@
         <strong>Load your data</strong>
         <p>Drag or click to upload into one of the two boxes:</p>
         <ul>
-          <li><strong>Customer file</strong> &mdash; the original BM Orders tracker (.xlsx). The tool keeps only <em>Confirmed</em> rows (Cancelled lines are removed automatically), builds the tag fields, auto-fills <strong>POD</strong> from the style code, and leaves <strong>DATE</strong> blank for you.</li>
+          <li><strong>Customer file</strong> &mdash; the original BM Orders tracker (.xlsx). The tool keeps only <em>Confirmed</em> rows (Cancelled lines are removed automatically), builds the tag fields, auto-fills <strong>POD</strong> from the style code, and fills <strong>DATE</strong> from the &ldquo;Requested HOD&rdquo; column (override it anytime).</li>
           <li><strong>Internal file</strong> &mdash; your own Data sheet or CSV that is already in tag format (STYLE# &amp; NAME, COLOR, &hellip;). Nothing is filtered or remapped.</li>
         </ul>
         <p>No file yet? Click <strong>Download Excel template</strong> for a blank sheet with the right columns.</p>
@@ -189,7 +189,7 @@
       <div id="dropCust" class="filezone half">
         <div class="fz-title">Customer file</div>
         <strong>Click to upload</strong><br>
-        <span class="meta">Original BM Orders file. Cancelled lines removed; DATE &amp; POD left blank.</span>
+        <span class="meta">Original BM Orders file. Cancelled lines removed; DATE from Requested HOD, POD auto-mapped.</span>
         <input id="fileCust" type="file" accept=".xlsx,.xls,.csv,text/csv" style="display:none">
       </div>
       <div id="dropInt" class="filezone half">
@@ -468,6 +468,7 @@ function extractCustomer(matrix, hdr){
   var iFactory=idxOf(cols,"factory #"); if(iFactory===-1) iFactory=idxOf(cols,"factory#");
   var iOrigin=idxOf(cols,"sample country of origin");
   var iSeason=idxOf(cols,"season");
+  var iDate=idxOf(cols,"requested hod");
   var out=[], dropped=0;
   for(var r=hdr.row+1;r<matrix.length;r++){
     var cells=matrix[r]; if(!cells) continue;
@@ -484,7 +485,8 @@ function extractCustomer(matrix, hdr){
     o["SAMPLE ORIGIN:"]=norm(iOrigin>=0?cells[iOrigin]:"");
     o["SEASON:"]=norm(iSeason>=0?cells[iSeason]:"");
     o["SIZE:"]=norm(iSize>=0?cells[iSize]:"");
-    // DATE, POD, SAMPLE STAGE intentionally left blank for the user to fill
+    o["DATE:"]=iDate>=0?fmtDate(norm(cells[iDate])):"";  // from "Requested HOD"
+    // POD, SAMPLE STAGE intentionally left blank; POD auto-filled from style code after load
     out.push(o);
   }
   window.__lastExtractInfo={count:out.length, dropped:dropped, mode:"customer"};
@@ -531,7 +533,7 @@ function loadMatrix(matrix, mode){
   if(info && info.mode==="customer"){ podFilled=applyPodMapping(true); }
   clearErr(); render();
   if(info && info.mode==="customer"){
-    showInfo("Loaded "+info.count+" tag"+(info.count>1?"s":"")+" from the customer file"+(info.dropped>0?" ("+info.dropped+" Cancelled line"+(info.dropped>1?"s":"")+" removed)":"")+". POD auto-filled from the Style code on "+podFilled+" tag"+(podFilled===1?"":"s")+". DATE is blank \u2014 set it once with \u201cDate for all tags\u201d above, or click any cell to edit.");
+    showInfo("Loaded "+info.count+" tag"+(info.count>1?"s":"")+" from the customer file"+(info.dropped>0?" ("+info.dropped+" Cancelled line"+(info.dropped>1?"s":"")+" removed)":"")+". POD auto-filled from the Style code on "+podFilled+" tag"+(podFilled===1?"":"s")+". DATE filled from \u201cRequested HOD\u201d \u2014 override it anytime with \u201cDate for all tags\u201d above, or click any cell to edit.");
   } else if(info && info.mode==="direct"){
     showInfo("Loaded "+info.count+" tag"+(info.count>1?"s":"")+". Click any cell below to edit before saving.");
   }
